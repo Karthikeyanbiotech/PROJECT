@@ -1,0 +1,127 @@
+Differential Expression and Functional Dependency Analysis
+________________________________________
+Step 1: Objective of Task 3
+The objective of Task 3 was to functionally validate the prioritized target gene (EGFR) by integrating:
+1.	Transcriptomic evidence (TCGA-LUAD)
+2.	Functional genomics evidence (DepMap CRISPR)
+This step was performed to confirm whether EGFR is biologically active and essential in lung adenocarcinoma.
+________________________________________
+Step 2: Data Sources Used
+Two independent public datasets were used.
+1. TCGA Transcriptomics Dataset
+Source:
+•	UCSC Xena / TCGA Portal
+Dataset:
+•	TCGA-LUAD RNA-seq (HiSeqV2)
+File downloaded:
+•	TCGA.LUAD.sampleMap_HiSeqV2
+Contents of the file:
+•	Rows → genes
+•	Columns → patient samples
+•	Values → log2 normalized expression values
+________________________________________
+2. DepMap Functional Genomics Dataset
+Source:
+•	DepMap (Cancer Dependency Map)
+Files downloaded:
+•	CRISPRGeneEffect.csv
+•	Model.csv
+Contents:
+•	CRISPRGeneEffect.csv → gene knockout dependency scores
+•	Model.csv → cancer type annotation for each cell line
+________________________________________
+Step 3: Importing Required Python Libraries
+The following Python libraries were imported:
+•	pandas → data handling
+•	numpy → numerical calculations
+•	matplotlib → visualization
+•	scipy.stats → statistical testing
+These libraries were used for data preprocessing, analysis, and interpretation.
+________________________________________
+Step 4: Loading TCGA Expression Data
+The TCGA LUAD expression file was loaded using pandas.
+The gene column was renamed to allow identification of individual genes.
+This step allowed access to gene-wise expression data.
+________________________________________
+Step 5: Extraction of EGFR Expression
+From the full transcriptomic matrix:
+•	Only the row corresponding to the gene EGFR was extracted.
+•	The matrix was transposed so that each row represented one patient sample.
+This step was performed to analyze EGFR expression across samples.
+________________________________________
+Step 6: Tumor and Normal Sample Identification
+TCGA sample barcodes were used to classify samples:
+•	code 01 → tumor
+•	code 11 → normal
+Each sample was assigned a group label based on barcode suffix.
+Samples without valid labels were removed.
+________________________________________
+Step 7: Creation of Expression Output File
+A cleaned output file was generated:
+•	File name: EGFR_LUAD_Tumor_vs_Normal.csv
+This file contains:
+•	sample ID
+•	EGFR expression value
+•	sample group (tumor or normal)
+This file was used for result documentation.
+________________________________________
+Step 8: Differential Expression Testing
+EGFR expression values were separated into:
+•	tumor group
+•	normal group
+A Mann–Whitney U test was applied.
+Reason for using this test:
+•	RNA-seq expression values are not normally distributed
+•	Non-parametric testing provides reliable comparison
+The test was used to evaluate statistical difference between tumor and normal samples.
+________________________________________
+Step 9: Visualization of Expression Pattern
+A boxplot was generated to visualize:
+•	EGFR expression in tumor samples
+•	EGFR expression in normal samples
+This helped in visual interpretation of expression differences.
+________________________________________
+Step 10: Loading DepMap CRISPR Data
+The CRISPR gene effect file was loaded using pandas.
+The EGFR gene-effect column was extracted from the dataset.
+This column represents cell viability loss after EGFR knockout.
+________________________________________
+Step 11: Integration with Cell Line Metadata
+The CRISPR dependency data was merged with the Model.csv file.
+Purpose:
+•	to identify cancer type for each cell line
+•	to filter LUAD-specific cell lines only
+________________________________________
+Step 12: LUAD Cell Line Filtering
+Cell lines with Oncotree code LUAD were retained.
+This ensured that functional analysis was specific to lung adenocarcinoma.
+________________________________________
+Step 13: Dependency Score Interpretation
+EGFR gene-effect scores were interpreted using standard thresholds:
+•	≤ −0.5 → strong dependency
+•	−0.3 to −0.5 → moderate dependency
+•	−0.3 → weak or no dependency
+These thresholds reflect biological dependency strength.
+________________________________________
+Step 14: Quantification of Dependency Categories
+The number of LUAD cell lines in each dependency category was calculated using NumPy.
+The proportion of strongly dependent cell lines was also computed.
+This quantified the functional relevance of EGFR.
+________________________________________
+Step 15: Visualization of Dependency Distribution
+A histogram of EGFR dependency scores was generated.
+Vertical cutoff lines were added at −0.5 and −0.3 to visualize dependency thresholds.
+________________________________________
+Step 16: Final Interpretation
+Results from both datasets were compared:
+•	TCGA → transcriptional behavior
+•	DepMap → functional necessity
+This integrated analysis helped determine whether EGFR acts as:
+•	expression-driven target, or
+•	mutation-driven oncogene addiction target.
+________________________________________
+Final Outcome of Task 3
+EGFR showed:
+•	limited transcriptional upregulation
+•	strong functional dependency in a subset of LUAD cell lines
+This supports EGFR as a precision oncology target rather than a universal LUAD target.
