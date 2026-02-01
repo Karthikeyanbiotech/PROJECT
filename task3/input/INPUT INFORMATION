@@ -1,1 +1,98 @@
+1. TCGA LUAD Expression Dataset
 
+File name:
+TCGA.LUAD.sampleMap_HiSeqV2
+
+Source:
+UCSC Xena Browser (TCGA project)
+
+Dataset origin:
+The Cancer Genome Atlas (TCGA)
+
+Cancer type:
+Lung Adenocarcinoma (LUAD)
+
+File format:
+Tab-separated values (TSV)
+
+Description:
+This file contains RNA-seq gene expression data generated using the Illumina HiSeq platform for LUAD patient samples.
+
+Data structure:
+
+Rows represent individual genes
+
+Columns represent patient samples
+
+Values represent log2-normalized gene expression levels
+
+Sample information:
+Each sample column contains a TCGA barcode, where:
+
+01 indicates primary tumor tissue
+
+11 indicates normal lung tissue
+
+Purpose in Task 3:
+This file was used to compare EGFR expression between tumor and normal LUAD samples.
+
+2. DepMap CRISPR Gene Dependency Dataset
+
+File name:
+CRISPRGeneEffect.csv
+
+Source:
+Cancer Dependency Map (DepMap) Portal
+
+Dataset type:
+Genome-wide CRISPR–Cas9 knockout screening data
+
+File format:
+Comma-separated values (CSV)
+
+Description:
+This dataset contains gene effect scores that quantify the impact of gene knockout on cancer cell survival.
+
+Data structure:
+
+Rows represent cancer cell lines
+
+Columns represent genes
+
+Values represent gene-effect dependency scores
+
+Score interpretation:
+
+More negative values indicate stronger dependency
+
+Scores near zero indicate non-essential genes
+
+Purpose in Task 3:
+This file was used to evaluate whether LUAD cell lines depend on EGFR for survival.
+
+3. DepMap Cell Line Annotation File
+
+File name:
+Model.csv
+
+Source:
+DepMap Portal
+
+File format:
+CSV
+
+Description:
+This file provides metadata information for each cancer cell line.
+
+Key information included:
+
+DepMap cell line ID
+
+Cancer type classification
+
+Oncotree cancer code
+
+Tissue of origin
+
+Purpose in Task 3:
+This file was used to identify and filter Lung Adenocarcinoma (LUAD) cell lines from the CRISPR dependency dataset.
