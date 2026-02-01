@@ -1,33 +1,37 @@
-# lung adenocarcinoma data
-
-# OPEN TARGET
-
 import pandas as pd
 import numpy as np
-df = pd.read_csv("task1_2/task1_input/openTarget_dataset.tsv", na_values=["No data"], sep='\t')
-df = df[
-    [
-        "symbol",
-        "globalScore",
-        "cancerGeneCensus",
-        "intogen",
-        "evaSomatic",
-        "cancerBiomarkers",
-        "chembl",
-        "reactome",
-        "europepmc"
-    ]
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+
+# --- 1. SETUP PATHS ---
+# This ensures the code knows where to look regardless of who runs it
+INPUT_FILE = "../task1_input/openTarget_dataset.tsv"
+OUTPUT_DIR = "../output"
+
+# Create output directory if it doesn't exist
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+
+# --- 2. DATA LOADING & CLEANING ---
+df = pd.read_csv(INPUT_FILE, na_values=["No data"], sep='\t')
+
+# Selecting specific columns for analysis
+cols_to_keep = [
+    "symbol", "globalScore", "cancerGeneCensus", "intogen", 
+    "evaSomatic", "cancerBiomarkers", "chembl", "reactome", "europepmc"
 ]
-df = df.fillna(0);
+df = df[cols_to_keep]
+df = df.fillna(0)
 
-# filter strong disease-associated targets
+# Filter strong disease-associated targets and sort
 df = df[df["globalScore"] >= 0.2]
-
-# sort by association strength
 df = df.sort_values(by="globalScore", ascending=False)
 
-# save step  output
-df.to_csv("task1_2/output/SelectedTargets.csv", index=False)
+# Save intermediate filtered data
+df.to_csv(f"{OUTPUT_DIR}/SelectedTargets.csv", index=False)
+
+# --- 3. PRIORITY SCORING ---
 weights = {
     "globalScore": 0.30,
     "cancerGeneCensus": 0.15,
@@ -39,7 +43,6 @@ weights = {
     "europepmc": 0.05
 }
 
-# calculate priority score
 df["priorityScore"] = (
     df["globalScore"] * weights["globalScore"] +
     df["cancerGeneCensus"] * weights["cancerGeneCensus"] +
@@ -51,52 +54,35 @@ df["priorityScore"] = (
     df["europepmc"] * weights["europepmc"]
 )
 
-# rank targets
+# Rank and save final CSV
 df = df.sort_values("priorityScore", ascending=False)
+df.to_csv(f"{OUTPUT_DIR}/RankedTargets.csv", index=False)
 
-# save ranked targets
-df.to_csv("task1_2/output/RankedTargets.csv", index=False)
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-
-df = pd.read_csv("task1_2/output/RankedTargets.csv")
-
+# --- 4. VISUALIZATION: TOP 10 BAR CHART ---
 top10 = df.head(10)
-
-plt.figure(figsize=(8,5))
-plt.bar(top10["symbol"], top10["priorityScore"])
-plt.xlabel("Target genes")
-plt.ylabel("Priority score")
-plt.title("Top 10 prioritized cancer targets")
+plt.figure(figsize=(10, 6))
+plt.bar(top10["symbol"], top10["priorityScore"], color='skyblue', edgecolor='navy')
+plt.xlabel("Target Genes", fontweight='bold')
+plt.ylabel("Priority Score", fontweight='bold')
+plt.title("Top 10 Prioritized Cancer Targets", fontsize=14)
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.savefig("task1_2/output/top_10_cancer_targets.png", dpi=300)
+plt.savefig(f"{OUTPUT_DIR}/top_10_cancer_targets.png", dpi=300)
 plt.show()
 
-
+# --- 5. VISUALIZATION: FEATURE HEATMAP ---
 features = [
-    "globalScore",
-    "cancerGeneCensus",
-    "intogen",
-    "evaSomatic",
-    "cancerBiomarkers",
-    "chembl",
-    "reactome",
-    "europepmc"
+    "globalScore", "cancerGeneCensus", "intogen", "evaSomatic", 
+    "cancerBiomarkers", "chembl", "reactome", "europepmc"
 ]
-
 top5 = df.head(5)
 heatmap_data = top5.set_index("symbol")[features]
 
-plt.figure(figsize=(8,4))
-sns.heatmap(
-    heatmap_data,
-    annot=True,
-    cmap="viridis",
-    linewidths=0.5
-)
-plt.title("Feature contribution heatmap (Top 5 targets)")
+plt.figure(figsize=(10, 5))
+sns.heatmap(heatmap_data, annot=True, cmap="viridis", linewidths=0.5)
+plt.title("Feature Contribution Heatmap (Top 5 Targets)", fontsize=14)
 plt.tight_layout()
-plt.savefig("task1_2/output/feature_contribution_heatmap.png", dpi=300) 
+plt.savefig(f"{OUTPUT_DIR}/feature_contribution_heatmap.png", dpi=300)
 plt.show()
+
+print(f"Analysis complete. All files saved to: {OUTPUT_DIR}")
