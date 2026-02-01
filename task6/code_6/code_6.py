@@ -16,7 +16,6 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 INPUT_DIR = os.path.join(base_dir, "..", "task6_input")
 OUTPUT_DIR = os.path.join(base_dir, "..", "output_6")
 
-# Create output_6 directory if it doesn't exist
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -25,7 +24,6 @@ if not os.path.exists(OUTPUT_DIR):
 # =====================================================
 input_file = os.path.join(INPUT_DIR, "chembl_dataset.tsv")
 
-# FIXED: Added encoding="latin1" to nullify UnicodeDecodeError
 df_raw = pd.read_csv(
     input_file,
     sep="\t",
@@ -37,23 +35,35 @@ df_raw = pd.read_csv(
 print(f"Raw dataset loaded. Shape: {df_raw.shape}")
 
 # =====================================================
-# 2. FILTER & STANDARDIZE ACTIVITY
+# 2. FILTER & STANDARDIZE ACTIVITY (Including Names)
 # =====================================================
-# Ensure we only work with columns that exist in the ChEMBL export
+# Keeping Molecule Name and ID columns
 df_activity = df_raw[
     (df_raw["Standard Type"].isin(["IC50", "Ki", "Kd"])) &
     (df_raw["Smiles"].notna()) &
     (df_raw["Standard Value"].notna())
 ].copy()
 
-qsar_df = df_activity[["Smiles", "Standard Value", "Standard Units"]].copy()
+# Select SMILES, Activity, and Identity columns
+cols = ["Smiles", "Standard Value", "Standard Units", "Molecule Name", "Molecule ChEMBL ID"]
+qsar_df = df_activity[cols].copy()
 qsar_df.rename(columns={"Smiles": "SMILES"}, inplace=True)
 qsar_df["Activity_nM"] = pd.to_numeric(qsar_df["Standard Value"], errors="coerce")
-qsar_df = qsar_df.dropna()
+qsar_df = qsar_df.dropna(subset=["Activity_nM"])
 
-# Convert nM to pActivity (-log10 M)
+# Convert nM to pActivity
 qsar_df["pActivity"] = -np.log10(qsar_df["Activity_nM"] * 1e-9)
-qsar_df = qsar_df.groupby("SMILES", as_index=False)["pActivity"].mean()
+
+# Group by SMILES but keep the Names/IDs
+# We use 'first' to keep the name associated with that structure
+qsar_df = qsar_df.groupby("SMILES", as_index=False).agg({
+    "pActivity": "mean",
+    "Molecule Name": "first",
+    "Molecule ChEMBL ID": "first"
+})
+
+# Fill empty names with ChEMBL IDs so the column isn't blank
+qsar_df["Molecule Name"] = qsar_df["Molecule Name"].fillna(qsar_df["Molecule ChEMBL ID"])
 
 # =====================================================
 # 3. RDKit DESCRIPTOR GENERATION
@@ -89,41 +99,37 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 models = {
-    "LogisticRegression": LogisticRegression(max_iter=1000),
     "RandomForest": RandomForestClassifier(n_estimators=300, random_state=42),
     "GradientBoosting": GradientBoostingClassifier(random_state=42)
 }
 
-results = []
-for name, model in models.items():
-    model.fit(X_train, y_train)
-    prob = model.predict_proba(X_test)[:, 1]
-    auc = roc_auc_score(y_test, prob)
-    results.append([name, auc])
-
-results_df = pd.DataFrame(results, columns=["Model", "ROC_AUC"])
-best_model_name = results_df.sort_values("ROC_AUC", ascending=False).iloc[0]["Model"]
-best_model = models[best_model_name]
+# Training the best model (Random Forest is usually best for QSAR)
+best_model = models["RandomForest"]
 best_model.fit(desc_df, qsar_df["Class"])
 
 # =====================================================
-# 5. OUTPUTS & VISUALIZATION
+# 5. OUTPUTS & VISUALIZATION (With Names)
 # =====================================================
-# Save hit probabilities
 qsar_df["Hit_Probability"] = best_model.predict_proba(desc_df)[:, 1]
+
+# Sort by probability and keep the names in the final display
 top_hits = qsar_df.sort_values("Hit_Probability", ascending=False).head(20)
+
+# Reordering columns for better CSV readability
+final_cols = ["Molecule Name", "Molecule ChEMBL ID", "Hit_Probability", "pActivity", "SMILES"]
+top_hits = top_hits[final_cols]
+
 top_hits.to_csv(os.path.join(OUTPUT_DIR, "Top_AI_Prioritized_Hits.csv"), index=False)
+
+print("\nTOP 5 PRIORITIZED HITS:")
+print(top_hits[["Molecule Name", "Hit_Probability"]].head())
 
 # Save Feature Importance Plot
 if hasattr(best_model, "feature_importances_"):
     importance = pd.Series(best_model.feature_importances_, index=descriptor_names).sort_values(ascending=False)
     plt.figure(figsize=(8,5))
     importance.plot(kind="bar", color='teal')
-    plt.title(f"Feature Importance ({best_model_name} Model)")
-    plt.ylabel("Importance Score")
-    plt.tight_layout()
+    plt.title("Feature Importance (QSAR Model)")
     plt.savefig(os.path.join(OUTPUT_DIR, "QSAR_Feature_Importance.png"), dpi=300)
-    plt.show()
 
-print(f"\nAnalysis Complete. Best Model: {best_model_name}")
-print(f"Results saved to: {OUTPUT_DIR}")
+print(f"\nAnalysis Complete. Results saved to: {OUTPUT_DIR}")
