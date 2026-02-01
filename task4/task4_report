@@ -1,0 +1,126 @@
+Task 4: Pathway and Network Analysis for Target Validation
+Objective
+
+The objective of this task was to validate the selected target EGFR at the pathway and network level by assessing its mechanistic role within disease-relevant signaling systems. While transcriptomic and functional genomics analyses establish whether a gene is associated with disease, pathway and network analysis provides insight into how the target operates biologically, its regulatory influence, and potential safety or resistance risks.
+
+Rationale
+
+In modern drug discovery, targets are evaluated not in isolation but within the context of cellular signaling networks. A therapeutically viable target should:
+
+participate in disease-relevant pathways
+
+exert regulatory control over downstream signaling
+
+demonstrate mechanistic plausibility for pharmacological modulation
+
+Therefore, pathway-level validation was performed to confirm whether EGFR functions as a central oncogenic regulator in Lung Adenocarcinoma (LUAD).
+
+Pathway Selection
+
+The EGFR signaling pathway was selected from the Reactome database (Reactome ID: R-HSA-1643713), as it represents a curated and experimentally validated model of receptor tyrosine kinase signaling in human cells.
+
+This pathway includes:
+
+ligand binding and receptor activation
+
+adaptor protein recruitment
+
+downstream MAPK and PI3K–AKT signaling cascades
+
+A total of 25 pathway-associated genes were extracted to define the mechanistic neighborhood of EGFR.
+
+Protein–Protein Interaction Network Construction
+
+Protein–protein interactions among the pathway genes were retrieved using the STRING database, focusing on high-confidence functional and physical interactions.
+
+The resulting network consisted of:
+
+Nodes: pathway proteins
+
+Edges: experimentally supported or predicted interactions
+
+This network captures the flow of oncogenic signaling initiated by EGFR activation.
+
+Network Scoring Methodology
+
+To quantify the relative importance of each protein within the signaling network, degree centrality was calculated using NetworkX.
+
+Degree centrality measures:
+
+the number of direct interactions associated with a protein
+
+its influence over information flow within the network
+
+Higher centrality indicates stronger regulatory importance and greater biological impact.
+
+Network Centrality Results
+
+The top interacting proteins identified through degree centrality analysis are shown below:
+
+Protein	Degree Centrality
+EGFR	0.83
+EGF	0.46
+GRB2	0.46
+SOS1	0.38
+PIK3CA	0.38
+PIK3R1	0.33
+TGFA	0.33
+GAB1	0.33
+HBEGF	0.29
+BTC	0.29
+Biological Interpretation of Network Scores
+EGFR as a Dominant Signaling Hub
+
+EGFR exhibits the highest degree centrality in the network, confirming its role as the primary signaling hub. Its extensive connectivity indicates direct regulation of multiple downstream pathways controlling proliferation, survival, and resistance mechanisms.
+
+This high centrality provides strong mechanistic justification for EGFR as a driver oncogene in LUAD.
+
+Ligand Redundancy and Signal Robustness
+
+Multiple ligands (EGF, TGFA, HBEGF, BTC) demonstrate moderate centrality, highlighting redundant receptor activation mechanisms. This redundancy explains persistent EGFR signaling even under partial pathway inhibition and contributes to therapeutic resistance.
+
+Adaptor and Downstream Signaling Components
+
+Adaptor proteins (GRB2, GAB1, SOS1) serve as signal transducers linking receptor activation to intracellular cascades. Downstream kinases (PIK3CA, PIK3R1) represent activation of the PI3K–AKT survival axis, a key oncogenic pathway in LUAD.
+
+Mechanistic Insight
+
+The network structure reveals a clear hierarchical organization:
+
+Ligand-mediated EGFR activation
+
+Adaptor-based signal amplification
+
+Parallel activation of MAPK and PI3K pathways
+
+EGFR occupies the highest regulatory tier, meaning that pharmacological inhibition at this level produces broad downstream disruption.
+
+Safety and Risk Considerations
+
+High network centrality is associated with both therapeutic benefit and potential risk:
+
+Strong centrality explains clinical efficacy of EGFR inhibitors
+
+Extensive pathway connectivity increases likelihood of on-target toxicity
+
+Downstream redundancy supports emergence of resistance
+
+These findings are consistent with known clinical observations, reinforcing the biological realism of the network model.
+
+Validation Conclusion (GO / NO-GO)
+
+Decision: GO — Mechanistically Supported Target
+
+EGFR demonstrates:
+
+dominant pathway integration
+
+highest network centrality
+
+direct control over oncogenic signaling modules
+
+This systems-level evidence strongly supports EGFR as a mechanistically validated therapeutic target in LUAD.
+
+Overall Conclusion
+
+Pathway and network analysis confirms that EGFR functions as a central oncogenic regulator within LUAD signaling architecture. The high degree centrality, extensive ligand connectivity, and downstream pathway activation collectively explain both therapeutic efficacy and resistance behavior observed clinically. This mechanistic validation strengthens confidence in EGFR as a high-priority target for continued therapeutic development and combination strategy exploration.
