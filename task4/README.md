@@ -3,7 +3,7 @@ pathway = pd.read_csv(
     "Participating Molecules [R-HSA-1643713].tsv", sep="\t"
 )
 
-What you did
+
 
 You loaded a Reactome pathway TSV file into Python.
 
